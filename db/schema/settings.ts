@@ -3,6 +3,7 @@ import { users } from './users';
 
 export const settings = sqliteTable('settings', {
   id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  companySlug: text('company_slug').notNull().default('restaurant'),
   tables: text('tables', { mode: 'json' }).$type<number[]>().notNull(),
   requestTypes: text('request_types', { mode: 'json' }).$type<string[]>().notNull(),
   soundEnabled: integer('sound_enabled', { mode: 'boolean' }).notNull().default(true),

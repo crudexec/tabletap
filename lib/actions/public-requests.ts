@@ -62,13 +62,45 @@ export async function getRequestTypesForTable(tableNumber: number): Promise<stri
   return ['Service', 'Bill'];
 }
 
+export async function validateTableByCompany(
+  companySlug: string,
+  tableNumber: number
+): Promise<{ valid: boolean; settingsId?: string }> {
+  const allSettings = await db.select().from(settings);
+
+  for (const s of allSettings) {
+    if (s.companySlug === companySlug && s.tables.includes(tableNumber)) {
+      return { valid: true, settingsId: s.id };
+    }
+  }
+
+  return { valid: false };
+}
+
+export async function getRequestTypesByCompany(
+  companySlug: string,
+  tableNumber: number
+): Promise<string[]> {
+  const allSettings = await db.select().from(settings);
+
+  for (const s of allSettings) {
+    if (s.companySlug === companySlug && s.tables.includes(tableNumber)) {
+      return s.requestTypes;
+    }
+  }
+
+  // Default fallback
+  return ['Service', 'Bill'];
+}
+
 export async function createPublicRequest(
+  companySlug: string,
   tableNumber: number,
   requestType: string
 ): Promise<{ success: boolean; error?: string }> {
   // Get client IP for rate limiting
   const clientIP = await getClientIP();
-  const rateLimitKey = `${clientIP}-${tableNumber}`;
+  const rateLimitKey = `${clientIP}-${companySlug}-${tableNumber}`;
 
   if (!checkRateLimit(rateLimitKey)) {
     return {
@@ -77,14 +109,14 @@ export async function createPublicRequest(
     };
   }
 
-  // Validate table exists
-  const tableExists = await validateTableExists(tableNumber);
-  if (!tableExists) {
+  // Validate table exists for this company
+  const validation = await validateTableByCompany(companySlug, tableNumber);
+  if (!validation.valid) {
     return { success: false, error: 'Invalid table number' };
   }
 
   // Validate request type
-  const validTypes = await getRequestTypesForTable(tableNumber);
+  const validTypes = await getRequestTypesByCompany(companySlug, tableNumber);
   if (!validTypes.includes(requestType)) {
     return { success: false, error: 'Invalid request type' };
   }

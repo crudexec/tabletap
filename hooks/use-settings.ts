@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { getSettings, updateSettings } from '@/lib/actions/settings';
 
 interface Settings {
+  companySlug: string;
   tables: number[];
   requestTypes: string[];
   soundEnabled: boolean;
@@ -11,6 +12,7 @@ interface Settings {
 }
 
 const DEFAULT_SETTINGS: Settings = {
+  companySlug: 'restaurant',
   tables: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
   requestTypes: ['Service', 'Bill'],
   soundEnabled: true,

@@ -256,7 +256,7 @@ export function SettingsModal({ open, onClose, settings, onSave }: SettingsModal
                   <p className="text-caption">Print QR codes for customer self-service</p>
                 </div>
 
-                <QRCodeGrid tables={localSettings.tables} />
+                <QRCodeGrid tables={localSettings.tables} companySlug={localSettings.companySlug} />
               </div>
             )}
           </div>

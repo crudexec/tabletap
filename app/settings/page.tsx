@@ -20,7 +20,7 @@ export default function SettingsPage() {
   const [localSettings, setLocalSettings] = useState<Settings | null>(null);
   const [newTable, setNewTable] = useState('');
   const [newRequestType, setNewRequestType] = useState('');
-  const [activeSection, setActiveSection] = useState<'tables' | 'types' | 'menu' | 'notifications' | 'qr'>('tables');
+  const [activeSection, setActiveSection] = useState<'general' | 'tables' | 'types' | 'menu' | 'notifications' | 'qr'>('general');
   const [hasChanges, setHasChanges] = useState(false);
 
   useEffect(() => {
@@ -90,6 +90,7 @@ export default function SettingsPage() {
   };
 
   const sections = [
+    { id: 'general', label: 'General', description: 'Company name and URL' },
     { id: 'tables', label: 'Tables', description: 'Manage restaurant tables' },
     { id: 'types', label: 'Request Types', description: 'Define service request types' },
     { id: 'menu', label: 'Menu', description: 'Create and manage your menu' },
@@ -182,6 +183,37 @@ export default function SettingsPage() {
 
           {/* Content Area */}
           <div className="flex-1 min-w-0">
+            {/* General Section */}
+            {activeSection === 'general' && (
+              <div className="space-y-6 animate-in fade-in duration-200">
+                <div>
+                  <h2 className="text-title mb-2">Company Settings</h2>
+                  <p className="text-body text-muted-foreground">
+                    Configure your company URL slug for table QR codes.
+                  </p>
+                </div>
+
+                <div className="p-6 rounded-2xl bg-secondary/30 border border-border space-y-4">
+                  <div>
+                    <label className="text-footnote block mb-2">Company URL Slug</label>
+                    <Input
+                      type="text"
+                      placeholder="your-company-name"
+                      value={localSettings.companySlug}
+                      onChange={(e) => setLocalSettings({
+                        ...localSettings,
+                        companySlug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-'),
+                      })}
+                      className="h-12 rounded-xl border-border bg-background max-w-md"
+                    />
+                    <p className="text-caption mt-2">
+                      Your table URLs will be: tablesignal.co/<span className="text-primary font-medium">{localSettings.companySlug || 'your-slug'}</span>/table/1
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Tables Section */}
             {activeSection === 'tables' && (
               <div className="space-y-6 animate-in fade-in duration-200">
@@ -364,7 +396,7 @@ export default function SettingsPage() {
                 </div>
 
                 <div className="p-6 rounded-2xl bg-secondary/30 border border-border">
-                  <QRCodeGrid tables={localSettings.tables} />
+                  <QRCodeGrid tables={localSettings.tables} companySlug={localSettings.companySlug} />
                 </div>
               </div>
             )}

@@ -1,10 +1,10 @@
 import { notFound } from 'next/navigation';
-import { validateTableExists, getRequestTypesForTable } from '@/lib/actions/public-requests';
+import { validateTableByCompany, getRequestTypesByCompany } from '@/lib/actions/public-requests';
 import { TableRequestClient } from './table-request-client';
 import type { Metadata } from 'next';
 
 interface Props {
-  params: Promise<{ id: string }>;
+  params: Promise<{ company: string; id: string }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -16,24 +16,25 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function TablePage({ params }: Props) {
-  const { id } = await params;
+  const { company, id } = await params;
   const tableNumber = parseInt(id, 10);
 
   if (isNaN(tableNumber) || tableNumber < 1) {
     notFound();
   }
 
-  const tableExists = await validateTableExists(tableNumber);
-  if (!tableExists) {
+  const validation = await validateTableByCompany(company, tableNumber);
+  if (!validation.valid) {
     notFound();
   }
 
-  const requestTypes = await getRequestTypesForTable(tableNumber);
+  const requestTypes = await getRequestTypesByCompany(company, tableNumber);
 
   return (
     <TableRequestClient
       tableNumber={tableNumber}
       requestTypes={requestTypes}
+      companySlug={company}
     />
   );
 }

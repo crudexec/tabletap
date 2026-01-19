@@ -7,6 +7,7 @@ import { eq } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 
 const DEFAULT_SETTINGS = {
+  companySlug: 'restaurant',
   tables: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
   requestTypes: ['Service', 'Bill'],
   soundEnabled: true,
@@ -26,6 +27,7 @@ export async function getSettings() {
   }
 
   return {
+    companySlug: userSettings.companySlug,
     tables: userSettings.tables,
     requestTypes: userSettings.requestTypes,
     soundEnabled: userSettings.soundEnabled,
@@ -34,6 +36,7 @@ export async function getSettings() {
 }
 
 export async function updateSettings(data: {
+  companySlug?: string;
   tables?: number[];
   requestTypes?: string[];
   soundEnabled?: boolean;

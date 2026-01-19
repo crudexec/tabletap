@@ -9,6 +9,7 @@ export interface ServiceRequest {
 }
 
 export interface Settings {
+  companySlug: string;
   tables: number[];
   requestTypes: string[];
   soundEnabled: boolean;

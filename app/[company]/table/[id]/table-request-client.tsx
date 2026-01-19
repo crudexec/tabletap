@@ -23,6 +23,7 @@ import type { MenuItem } from '@/lib/types';
 interface Props {
   tableNumber: number;
   requestTypes: string[];
+  companySlug: string;
 }
 
 const iconMap: Record<string, React.ReactNode> = {
@@ -32,7 +33,7 @@ const iconMap: Record<string, React.ReactNode> = {
   'Menu': <UtensilsCrossed className="w-5 h-5" />,
 };
 
-export function TableRequestClient({ tableNumber, requestTypes }: Props) {
+export function TableRequestClient({ tableNumber, requestTypes, companySlug }: Props) {
   const [loading, setLoading] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [cartOpen, setCartOpen] = useState(false);
@@ -51,7 +52,7 @@ export function TableRequestClient({ tableNumber, requestTypes }: Props) {
   const handleRequest = async (requestType: string) => {
     setLoading(requestType);
 
-    const result = await createPublicRequest(tableNumber, requestType);
+    const result = await createPublicRequest(companySlug, tableNumber, requestType);
 
     setLoading(null);
 

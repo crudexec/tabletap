@@ -1,0 +1,1 @@
+ALTER TABLE `settings` ADD `company_slug` text DEFAULT 'restaurant' NOT NULL;

@@ -8,9 +8,10 @@ import { cn } from '@/lib/utils';
 
 interface Props {
   tableNumber: number;
+  companySlug: string;
 }
 
-export function TableQRCode({ tableNumber }: Props) {
+export function TableQRCode({ tableNumber, companySlug }: Props) {
   const svgRef = useRef<SVGSVGElement>(null);
   const [baseUrl, setBaseUrl] = useState('');
   const [copied, setCopied] = useState(false);
@@ -19,7 +20,7 @@ export function TableQRCode({ tableNumber }: Props) {
     setBaseUrl(window.location.origin);
   }, []);
 
-  const url = `${baseUrl}/table/${tableNumber}`;
+  const url = `${baseUrl}/${companySlug}/table/${tableNumber}`;
 
   const downloadQR = () => {
     if (!svgRef.current) return;
@@ -118,9 +119,10 @@ export function TableQRCode({ tableNumber }: Props) {
 
 interface QRCodeGridProps {
   tables: number[];
+  companySlug: string;
 }
 
-export function QRCodeGrid({ tables }: QRCodeGridProps) {
+export function QRCodeGrid({ tables, companySlug }: QRCodeGridProps) {
   if (tables.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
@@ -141,7 +143,7 @@ export function QRCodeGrid({ tables }: QRCodeGridProps) {
             animationFillMode: 'backwards',
           }}
         >
-          <TableQRCode tableNumber={tableNumber} />
+          <TableQRCode tableNumber={tableNumber} companySlug={companySlug} />
         </div>
       ))}
     </div>
