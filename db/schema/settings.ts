@@ -1,16 +1,16 @@
-import { sqliteTable, text, integer, real } from 'drizzle-orm/sqlite-core';
+import { pgTable, text, uuid, boolean, real, timestamp, jsonb } from 'drizzle-orm/pg-core';
 import { users } from './users';
 
-export const settings = sqliteTable('settings', {
-  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+export const settings = pgTable('settings', {
+  id: uuid('id').primaryKey().defaultRandom(),
   companySlug: text('company_slug').notNull().default('restaurant'),
-  tables: text('tables', { mode: 'json' }).$type<number[]>().notNull(),
-  requestTypes: text('request_types', { mode: 'json' }).$type<string[]>().notNull(),
-  soundEnabled: integer('sound_enabled', { mode: 'boolean' }).notNull().default(true),
+  tables: jsonb('tables').$type<number[]>().notNull(),
+  requestTypes: jsonb('request_types').$type<string[]>().notNull(),
+  soundEnabled: boolean('sound_enabled').notNull().default(true),
   notificationVolume: real('notification_volume').notNull().default(0.5),
-  userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }).unique(),
-  createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
-  updatedAt: integer('updated_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
+  userId: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }).unique(),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
 });
 
 export type Settings = typeof settings.$inferSelect;

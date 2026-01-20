@@ -1,24 +1,24 @@
-import { sqliteTable, text, integer, real, index } from 'drizzle-orm/sqlite-core';
+import { pgTable, text, uuid, integer, real, timestamp, index } from 'drizzle-orm/pg-core';
 import { menuItems } from './menu';
 
-export const orders = sqliteTable('orders', {
-  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+export const orders = pgTable('orders', {
+  id: uuid('id').primaryKey().defaultRandom(),
   tableNumber: integer('table_number').notNull(),
-  status: text('status', { enum: ['pending', 'preparing', 'ready', 'completed', 'cancelled'] }).notNull().default('pending'),
+  status: text('status').notNull().default('pending'),
   notes: text('notes'),
   totalAmount: real('total_amount').notNull(),
-  createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
-  updatedAt: integer('updated_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
 }, (table) => [
   index('idx_orders_status').on(table.status),
   index('idx_orders_table_number').on(table.tableNumber),
   index('idx_orders_created_at').on(table.createdAt),
 ]);
 
-export const orderItems = sqliteTable('order_items', {
-  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
-  orderId: text('order_id').notNull().references(() => orders.id, { onDelete: 'cascade' }),
-  menuItemId: text('menu_item_id').notNull().references(() => menuItems.id),
+export const orderItems = pgTable('order_items', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  orderId: uuid('order_id').notNull().references(() => orders.id, { onDelete: 'cascade' }),
+  menuItemId: uuid('menu_item_id').notNull().references(() => menuItems.id),
   menuItemName: text('menu_item_name').notNull(), // Store name for historical reference
   quantity: integer('quantity').notNull().default(1),
   unitPrice: real('unit_price').notNull(),

@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
+import { pgTable, text, uuid, timestamp, jsonb } from 'drizzle-orm/pg-core';
 import { users } from './users';
 
 export interface TablePosition {
@@ -11,13 +11,13 @@ export interface TablePosition {
   seats: number;
 }
 
-export const tableLayouts = sqliteTable('table_layouts', {
-  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+export const tableLayouts = pgTable('table_layouts', {
+  id: uuid('id').primaryKey().defaultRandom(),
   name: text('name').notNull(),
-  positions: text('positions', { mode: 'json' }).$type<TablePosition[]>().notNull(),
-  userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }),
-  createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
-  updatedAt: integer('updated_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
+  positions: jsonb('positions').$type<TablePosition[]>().notNull(),
+  userId: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
 });
 
 export type TableLayout = typeof tableLayouts.$inferSelect;
