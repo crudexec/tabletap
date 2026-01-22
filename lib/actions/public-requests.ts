@@ -2,6 +2,7 @@
 
 import { db } from '@/db/client';
 import { serviceRequests, settings } from '@/db/schema';
+import { eq, and } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { headers } from 'next/headers';
 
@@ -97,7 +98,7 @@ export async function createPublicRequest(
   companySlug: string,
   tableNumber: number,
   requestType: string
-): Promise<{ success: boolean; error?: string }> {
+): Promise<{ success: boolean; requestId?: string; error?: string }> {
   // Get client IP for rate limiting
   const clientIP = await getClientIP();
   const rateLimitKey = `${clientIP}-${companySlug}-${tableNumber}`;
@@ -122,17 +123,43 @@ export async function createPublicRequest(
   }
 
   try {
-    await db.insert(serviceRequests).values({
+    const [created] = await db.insert(serviceRequests).values({
       tableNumber,
       requestType,
       status: 'active',
       userId: null, // Public request, no user associated
+    }).returning();
+
+    revalidatePath('/');
+    return { success: true, requestId: created.id };
+  } catch (error) {
+    console.error('Failed to create public request:', error);
+    return { success: false, error: 'Failed to create request' };
+  }
+}
+
+export async function cancelPublicRequest(
+  requestId: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    // Only allow canceling active requests
+    const request = await db.query.serviceRequests.findFirst({
+      where: and(
+        eq(serviceRequests.id, requestId),
+        eq(serviceRequests.status, 'active')
+      ),
     });
+
+    if (!request) {
+      return { success: false, error: 'Request not found or already completed' };
+    }
+
+    await db.delete(serviceRequests).where(eq(serviceRequests.id, requestId));
 
     revalidatePath('/');
     return { success: true };
   } catch (error) {
-    console.error('Failed to create public request:', error);
-    return { success: false, error: 'Failed to create request' };
+    console.error('Failed to cancel request:', error);
+    return { success: false, error: 'Failed to cancel request' };
   }
 }

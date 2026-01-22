@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import { validateTableByCompany, getRequestTypesByCompany } from '@/lib/actions/public-requests';
+import { getPublicMenu } from '@/lib/actions/public-menu';
 import { TableRequestClient } from './table-request-client';
 import type { Metadata } from 'next';
 
@@ -28,13 +29,19 @@ export default async function TablePage({ params }: Props) {
     notFound();
   }
 
-  const requestTypes = await getRequestTypesByCompany(company, tableNumber);
+  const [requestTypes, menu] = await Promise.all([
+    getRequestTypesByCompany(company, tableNumber),
+    getPublicMenu(),
+  ]);
+
+  const hasMenu = menu.length > 0;
 
   return (
     <TableRequestClient
       tableNumber={tableNumber}
       requestTypes={requestTypes}
       companySlug={company}
+      hasMenu={hasMenu}
     />
   );
 }
