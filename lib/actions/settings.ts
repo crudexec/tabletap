@@ -9,9 +9,12 @@ import { revalidatePath } from 'next/cache';
 const DEFAULT_SETTINGS = {
   companySlug: 'restaurant',
   tables: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+  tableSeats: { 1: 4, 2: 4, 3: 4, 4: 4, 5: 6, 6: 6, 7: 5, 8: 4, 9: 4, 10: 8 } as Record<number, number>,
   requestTypes: ['Service', 'Bill'],
   soundEnabled: true,
   notificationVolume: 0.5,
+  warningThreshold: 2,
+  criticalThreshold: 5,
 };
 
 export async function getSettings() {
@@ -29,18 +32,24 @@ export async function getSettings() {
   return {
     companySlug: userSettings.companySlug,
     tables: userSettings.tables,
+    tableSeats: userSettings.tableSeats ?? DEFAULT_SETTINGS.tableSeats,
     requestTypes: userSettings.requestTypes,
     soundEnabled: userSettings.soundEnabled,
     notificationVolume: userSettings.notificationVolume,
+    warningThreshold: userSettings.warningThreshold ?? DEFAULT_SETTINGS.warningThreshold,
+    criticalThreshold: userSettings.criticalThreshold ?? DEFAULT_SETTINGS.criticalThreshold,
   };
 }
 
 export async function updateSettings(data: {
   companySlug?: string;
   tables?: number[];
+  tableSeats?: Record<number, number>;
   requestTypes?: string[];
   soundEnabled?: boolean;
   notificationVolume?: number;
+  warningThreshold?: number;
+  criticalThreshold?: number;
 }) {
   const session = await auth();
   if (!session?.user) throw new Error('Unauthorized');

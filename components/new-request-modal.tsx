@@ -12,6 +12,7 @@ interface NewRequestModalProps {
   onSubmit: (tableNumber: number, requestType: string) => void;
   settings: Settings;
   existingRequests: Array<{ tableNumber: number; requestType: string }>;
+  initialTable?: number | null;
 }
 
 export function NewRequestModal({
@@ -19,10 +20,18 @@ export function NewRequestModal({
   onClose,
   onSubmit,
   settings,
-  existingRequests
+  existingRequests,
+  initialTable = null
 }: NewRequestModalProps) {
   const [selectedTable, setSelectedTable] = useState<number | null>(null);
   const [selectedType, setSelectedType] = useState<string | null>(null);
+
+  // Set initial table when modal opens with a pre-selected table
+  useEffect(() => {
+    if (open && initialTable !== null) {
+      setSelectedTable(initialTable);
+    }
+  }, [open, initialTable]);
 
   useEffect(() => {
     if (selectedTable && selectedType) {
@@ -58,37 +67,43 @@ export function NewRequestModal({
       <DialogContent className="max-w-lg p-0 gap-0 rounded-3xl border-0 shadow-ive-xl overflow-hidden bg-[var(--card-solid)]">
         {/* Header */}
         <div className="px-6 pt-6 pb-4">
-          <DialogTitle className="text-headline">New Request</DialogTitle>
-          <p className="text-caption mt-1">Select a table, then choose the request type</p>
+          <DialogTitle className="text-headline">
+            {initialTable !== null ? `Table ${initialTable}` : 'New Request'}
+          </DialogTitle>
+          <p className="text-caption mt-1">
+            {initialTable !== null ? 'Choose a request type' : 'Select a table, then choose the request type'}
+          </p>
         </div>
 
         <div className="px-6 pb-6 space-y-6">
-          {/* Table Selection */}
-          <div>
-            <label className="text-footnote block mb-3">Table</label>
-            <div className="grid grid-cols-5 gap-2">
-              {settings.tables.map((table, index) => (
-                <button
-                  key={table}
-                  onClick={() => handleTableSelect(table)}
-                  className={cn(
-                    'h-14 rounded-xl font-semibold text-[17px] transition-ive',
-                    'border border-border hover:border-primary/30',
-                    selectedTable === table
-                      ? 'bg-primary text-primary-foreground border-primary shadow-ive-sm'
-                      : 'bg-secondary hover:bg-secondary/80',
-                    'animate-in fade-in zoom-in-95'
-                  )}
-                  style={{
-                    animationDelay: `${index * 20}ms`,
-                    animationFillMode: 'backwards',
-                  }}
-                >
-                  {table}
-                </button>
-              ))}
+          {/* Table Selection - only show when no initial table */}
+          {initialTable === null && (
+            <div>
+              <label className="text-footnote block mb-3">Table</label>
+              <div className="grid grid-cols-5 gap-2">
+                {settings.tables.map((table, index) => (
+                  <button
+                    key={table}
+                    onClick={() => handleTableSelect(table)}
+                    className={cn(
+                      'h-14 rounded-xl font-semibold text-[17px] transition-ive',
+                      'border border-border hover:border-primary/30',
+                      selectedTable === table
+                        ? 'bg-primary text-primary-foreground border-primary shadow-ive-sm'
+                        : 'bg-secondary hover:bg-secondary/80',
+                      'animate-in fade-in zoom-in-95'
+                    )}
+                    style={{
+                      animationDelay: `${index * 20}ms`,
+                      animationFillMode: 'backwards',
+                    }}
+                  >
+                    {table}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Request Type Selection */}
           {selectedTable && (
@@ -132,9 +147,11 @@ export function NewRequestModal({
         {/* Bottom hint */}
         <div className="px-6 py-4 bg-secondary/50 border-t border-border">
           <p className="text-caption text-center">
-            {selectedTable
-              ? `Table ${selectedTable} selected · Choose request type`
-              : 'Tap a table number to begin'}
+            {initialTable !== null
+              ? 'Tap a request type to create'
+              : selectedTable
+                ? `Table ${selectedTable} selected · Choose request type`
+                : 'Tap a table number to begin'}
           </p>
         </div>
       </DialogContent>

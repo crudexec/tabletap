@@ -191,7 +191,7 @@ export default function LandingPage() {
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-500/25">
                 <Bell className="w-5 h-5 text-white" />
               </div>
-              <span className="text-xl font-semibold tracking-tight font-display">ServiceFlow</span>
+              <span className="text-xl font-semibold tracking-tight font-display">TableSignal</span>
             </div>
             <div className="flex items-center gap-4">
               <Link href="/login">
@@ -378,10 +378,10 @@ export default function LandingPage() {
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
                 <Bell className="w-4 h-4 text-white" />
               </div>
-              <span className="text-lg font-semibold font-display">ServiceFlow</span>
+              <span className="text-lg font-semibold font-display">TableSignal</span>
             </div>
             <div className="text-stone-500 text-sm">
-              © {new Date().getFullYear()} ServiceFlow. Built for restaurants that care.
+              © {new Date().getFullYear()} TableSignal. Built for restaurants that care.
             </div>
           </div>
         </div>

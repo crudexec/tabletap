@@ -11,9 +11,12 @@ export interface ServiceRequest {
 export interface Settings {
   companySlug: string;
   tables: number[];
+  tableSeats: Record<number, number>;
   requestTypes: string[];
   soundEnabled: boolean;
   notificationVolume: number;
+  warningThreshold: number;
+  criticalThreshold: number;
 }
 
 export interface Analytics {

@@ -20,7 +20,7 @@ const fraunces = Fraunces({
 });
 
 export const metadata: Metadata = {
-  title: "Restaurant Service Manager",
+  title: "TableSignal",
   description: "Real-time restaurant service request management system",
 };
 

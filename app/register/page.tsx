@@ -66,10 +66,10 @@ export default function RegisterPage() {
         {/* Logo */}
         <div className="text-center mb-10">
           <div className="w-16 h-16 rounded-2xl bg-primary mx-auto mb-4 flex items-center justify-center shadow-ive-lg">
-            <span className="text-primary-foreground font-semibold text-2xl">S</span>
+            <span className="text-primary-foreground font-semibold text-2xl">T</span>
           </div>
           <h1 className="text-title mb-1">Create account</h1>
-          <p className="text-caption">Get started with Service Manager</p>
+          <p className="text-caption">Get started with TableSignal</p>
         </div>
 
         {/* Form */}

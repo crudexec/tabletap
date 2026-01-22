@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { useSettings } from '@/hooks/use-settings';
-import { X, Plus, QrCode, Volume2, ChevronLeft, Check, UtensilsCrossed } from 'lucide-react';
+import { X, Plus, QrCode, Volume2, ChevronLeft, Check, UtensilsCrossed, Clock, Users } from 'lucide-react';
 import { QRCodeGrid } from '@/components/qr-code-generator';
 import { MenuManagement } from '@/components/menu-management';
 import { cn } from '@/lib/utils';
@@ -19,15 +19,16 @@ export default function SettingsPage() {
   const { settings, update: updateSettings, loading } = useSettings();
   const [localSettings, setLocalSettings] = useState<Settings | null>(null);
   const [newTable, setNewTable] = useState('');
+  const [newTableSeats, setNewTableSeats] = useState('4');
   const [newRequestType, setNewRequestType] = useState('');
   const [activeSection, setActiveSection] = useState<'general' | 'tables' | 'types' | 'menu' | 'notifications' | 'qr'>('general');
   const [hasChanges, setHasChanges] = useState(false);
 
   useEffect(() => {
-    if (settings && !localSettings) {
+    if (!loading && settings && !localSettings) {
       setLocalSettings(settings);
     }
-  }, [settings, localSettings]);
+  }, [settings, localSettings, loading]);
 
   useEffect(() => {
     if (settings && localSettings) {
@@ -39,20 +40,33 @@ export default function SettingsPage() {
   const addTable = () => {
     if (!localSettings) return;
     const tableNum = parseInt(newTable);
+    const seats = parseInt(newTableSeats) || 4;
     if (!isNaN(tableNum) && !localSettings.tables.includes(tableNum)) {
       setLocalSettings({
         ...localSettings,
         tables: [...localSettings.tables, tableNum].sort((a, b) => a - b),
+        tableSeats: { ...localSettings.tableSeats, [tableNum]: seats },
       });
       setNewTable('');
+      setNewTableSeats('4');
     }
   };
 
   const removeTable = (table: number) => {
     if (!localSettings) return;
+    const { [table]: _, ...remainingSeats } = localSettings.tableSeats;
     setLocalSettings({
       ...localSettings,
       tables: localSettings.tables.filter(t => t !== table),
+      tableSeats: remainingSeats,
+    });
+  };
+
+  const updateTableSeats = (table: number, seats: number) => {
+    if (!localSettings) return;
+    setLocalSettings({
+      ...localSettings,
+      tableSeats: { ...localSettings.tableSeats, [table]: seats },
     });
   };
 
@@ -128,7 +142,7 @@ export default function SettingsPage() {
               </Button>
               <div>
                 <h1 className="text-headline">Settings</h1>
-                <p className="text-caption">Configure your service manager</p>
+                <p className="text-caption">Configure your TableSignal settings</p>
               </div>
             </div>
 
@@ -220,44 +234,74 @@ export default function SettingsPage() {
                 <div>
                   <h2 className="text-title mb-2">Table Configuration</h2>
                   <p className="text-body text-muted-foreground">
-                    Add or remove tables from your restaurant floor plan.
+                    Add or remove tables and configure seating capacity.
                   </p>
                 </div>
 
                 <div className="p-6 rounded-2xl bg-secondary/30 border border-border">
-                  <div className="flex flex-wrap gap-2 mb-6">
+                  {/* Existing Tables */}
+                  <div className="space-y-3 mb-6">
                     {localSettings.tables.map((table) => (
                       <div
                         key={table}
-                        className="flex items-center gap-2 bg-background px-4 py-2.5 rounded-xl border border-border group hover:border-destructive/30 transition-ive"
+                        className="flex items-center gap-4 bg-background px-4 py-3 rounded-xl border border-border group hover:border-border transition-ive"
                       >
-                        <span className="text-[15px] font-medium">Table {table}</span>
+                        <span className="text-[15px] font-medium min-w-[80px]">Table {table}</span>
+                        <div className="flex items-center gap-2 flex-1">
+                          <Users className="w-4 h-4 text-muted-foreground" />
+                          <Input
+                            type="number"
+                            min="1"
+                            max="20"
+                            value={localSettings.tableSeats[table] || 4}
+                            onChange={(e) => updateTableSeats(table, parseInt(e.target.value) || 4)}
+                            className="h-9 w-20 rounded-lg border-border bg-secondary/50 text-center"
+                          />
+                          <span className="text-[13px] text-muted-foreground">seats</span>
+                        </div>
                         <button
                           onClick={() => removeTable(table)}
-                          className="w-6 h-6 rounded-lg flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-ive"
+                          className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-ive"
                         >
                           <X className="w-4 h-4" />
                         </button>
                       </div>
                     ))}
                     {localSettings.tables.length === 0 && (
-                      <p className="text-caption">No tables configured</p>
+                      <p className="text-caption text-center py-4">No tables configured</p>
                     )}
                   </div>
 
-                  <div className="flex gap-3">
-                    <Input
-                      type="number"
-                      placeholder="Table number"
-                      value={newTable}
-                      onChange={(e) => setNewTable(e.target.value)}
-                      onKeyDown={(e) => e.key === 'Enter' && addTable()}
-                      className="h-12 rounded-xl border-border bg-background"
-                    />
-                    <Button onClick={addTable} className="h-12 px-6 rounded-xl">
-                      <Plus className="w-4 h-4 mr-2" />
-                      Add Table
-                    </Button>
+                  {/* Add New Table */}
+                  <div className="pt-4 border-t border-border">
+                    <label className="text-footnote block mb-3">Add New Table</label>
+                    <div className="flex gap-3">
+                      <Input
+                        type="number"
+                        placeholder="Table number"
+                        value={newTable}
+                        onChange={(e) => setNewTable(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && addTable()}
+                        className="h-12 rounded-xl border-border bg-background flex-1"
+                      />
+                      <div className="flex items-center gap-2">
+                        <Users className="w-4 h-4 text-muted-foreground" />
+                        <Input
+                          type="number"
+                          min="1"
+                          max="20"
+                          placeholder="Seats"
+                          value={newTableSeats}
+                          onChange={(e) => setNewTableSeats(e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && addTable()}
+                          className="h-12 w-20 rounded-xl border-border bg-background text-center"
+                        />
+                      </div>
+                      <Button onClick={addTable} className="h-12 px-6 rounded-xl">
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -331,9 +375,9 @@ export default function SettingsPage() {
             {activeSection === 'notifications' && (
               <div className="space-y-6 animate-in fade-in duration-200">
                 <div>
-                  <h2 className="text-title mb-2">Notifications</h2>
+                  <h2 className="text-title mb-2">Notifications & Alerts</h2>
                   <p className="text-body text-muted-foreground">
-                    Configure sound alerts for new service requests.
+                    Configure sound alerts and status thresholds for service requests.
                   </p>
                 </div>
 
@@ -378,6 +422,73 @@ export default function SettingsPage() {
                       />
                     </div>
                   )}
+
+                  {/* Alert Thresholds */}
+                  <div className="p-6 rounded-2xl bg-secondary/30 border border-border">
+                    <div className="flex items-center gap-3 mb-4">
+                      <Clock className="w-5 h-5 text-muted-foreground" />
+                      <span className="text-[17px] font-medium">Alert Thresholds</span>
+                    </div>
+                    <p className="text-caption mb-6">
+                      Set when tables change status based on how long a request has been waiting.
+                    </p>
+
+                    <div className="space-y-6">
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-full bg-[var(--status-warning)]" />
+                            <span className="text-[15px] font-medium">Warning</span>
+                          </div>
+                          <span className="text-[15px] text-muted-foreground font-mono">
+                            {localSettings.warningThreshold} min
+                          </span>
+                        </div>
+                        <input
+                          type="range"
+                          min="1"
+                          max="10"
+                          step="1"
+                          value={localSettings.warningThreshold}
+                          onChange={(e) =>
+                            setLocalSettings({
+                              ...localSettings,
+                              warningThreshold: parseInt(e.target.value),
+                              criticalThreshold: Math.max(parseInt(e.target.value) + 1, localSettings.criticalThreshold),
+                            })
+                          }
+                          className="w-full h-2 bg-border rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[var(--status-warning)] [&::-webkit-slider-thumb]:shadow-ive-md [&::-webkit-slider-thumb]:transition-ive [&::-webkit-slider-thumb]:hover:scale-110"
+                        />
+                      </div>
+
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-full bg-[var(--status-critical)]" />
+                            <span className="text-[15px] font-medium">Critical</span>
+                          </div>
+                          <span className="text-[15px] text-muted-foreground font-mono">
+                            {localSettings.criticalThreshold} min
+                          </span>
+                        </div>
+                        <input
+                          type="range"
+                          min="2"
+                          max="15"
+                          step="1"
+                          value={localSettings.criticalThreshold}
+                          onChange={(e) =>
+                            setLocalSettings({
+                              ...localSettings,
+                              criticalThreshold: parseInt(e.target.value),
+                              warningThreshold: Math.min(parseInt(e.target.value) - 1, localSettings.warningThreshold),
+                            })
+                          }
+                          className="w-full h-2 bg-border rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[var(--status-critical)] [&::-webkit-slider-thumb]:shadow-ive-md [&::-webkit-slider-thumb]:transition-ive [&::-webkit-slider-thumb]:hover:scale-110"
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}

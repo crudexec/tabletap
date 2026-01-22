@@ -24,6 +24,7 @@ export default function Home() {
   const { settings, loading: settingsLoading } = useSettings();
 
   const [newRequestModalOpen, setNewRequestModalOpen] = useState(false);
+  const [selectedTableForRequest, setSelectedTableForRequest] = useState<number | null>(null);
   const [insightsDrawerOpen, setInsightsDrawerOpen] = useState(false);
   const [historyDrawerOpen, setHistoryDrawerOpen] = useState(false);
   const [elapsedTimes, setElapsedTimes] = useState<Record<string, number>>({});
@@ -146,8 +147,19 @@ export default function Home() {
     requestType: r.requestType,
   }));
 
-  const handleTableClick = () => {
+  const handleTableClick = (tableNumber: number) => {
+    setSelectedTableForRequest(tableNumber);
     setNewRequestModalOpen(true);
+  };
+
+  const handleNewRequestFromButton = () => {
+    setSelectedTableForRequest(null);
+    setNewRequestModalOpen(true);
+  };
+
+  const handleCloseNewRequestModal = () => {
+    setNewRequestModalOpen(false);
+    setSelectedTableForRequest(null);
   };
 
   if (requestsLoading || settingsLoading) {
@@ -178,10 +190,10 @@ export default function Home() {
             {/* Logo & Title */}
             <div className="flex items-center gap-4">
               <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-ive-sm">
-                <span className="text-primary-foreground font-semibold text-lg">S</span>
+                <span className="text-primary-foreground font-semibold text-lg">T</span>
               </div>
               <div>
-                <h1 className="text-subhead">Service</h1>
+                <h1 className="text-subhead">TableSignal</h1>
                 {session?.user?.email && (
                   <p className="text-caption text-[11px]">{session.user.email}</p>
                 )}
@@ -191,7 +203,7 @@ export default function Home() {
             {/* Actions - Icon-only for minimal aesthetic */}
             <div className="flex items-center gap-1">
               <Button
-                onClick={() => setNewRequestModalOpen(true)}
+                onClick={handleNewRequestFromButton}
                 size="icon"
                 className="w-10 h-10 rounded-xl bg-primary hover:bg-primary/90 shadow-ive-sm transition-ive"
               >
@@ -251,6 +263,10 @@ export default function Home() {
             <TableLayoutView
               activeRequests={formattedActiveRequests}
               onTableClick={handleTableClick}
+              tables={settings.tables}
+              tableSeats={settings.tableSeats}
+              warningThreshold={settings.warningThreshold}
+              criticalThreshold={settings.criticalThreshold}
             />
           </section>
 
@@ -310,10 +326,11 @@ export default function Home() {
       {/* Modals & Drawers */}
       <NewRequestModal
         open={newRequestModalOpen}
-        onClose={() => setNewRequestModalOpen(false)}
+        onClose={handleCloseNewRequestModal}
         onSubmit={handleCreateRequest}
         settings={settings}
         existingRequests={existingRequests}
+        initialTable={selectedTableForRequest}
       />
 
       <InsightsDrawer

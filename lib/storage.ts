@@ -9,9 +9,12 @@ const STORAGE_KEYS = {
 const DEFAULT_SETTINGS: Settings = {
   companySlug: 'restaurant',
   tables: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+  tableSeats: { 1: 4, 2: 4, 3: 4, 4: 4, 5: 6, 6: 6, 7: 5, 8: 4, 9: 4, 10: 8 },
   requestTypes: ['Service', 'Bill'],
   soundEnabled: true,
   notificationVolume: 0.5,
+  warningThreshold: 2,
+  criticalThreshold: 5,
 };
 
 export const storage = {

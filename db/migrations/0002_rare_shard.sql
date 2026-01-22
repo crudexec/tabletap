@@ -1,0 +1,1 @@
+ALTER TABLE "settings" ADD COLUMN "table_seats" jsonb DEFAULT '{}'::jsonb NOT NULL;
