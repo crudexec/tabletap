@@ -12,15 +12,8 @@
     {
       "idx": 1,
       "version": "7",
-      "when": 1769061650103,
-      "tag": "0001_wooden_lockheed",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1769067044686,
-      "tag": "0002_rare_shard",
+      "when": 1769068542569,
+      "tag": "0001_great_moonstone",
       "breakpoints": true
     }
   ]

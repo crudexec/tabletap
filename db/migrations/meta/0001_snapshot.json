@@ -1,5 +1,5 @@
 {
-  "id": "8e98eb1e-f4f7-483d-8433-0d3df5a1c65f",
+  "id": "08e01c83-4836-4de0-ad74-147d7ac0a44d",
   "prevId": "4dccca8b-256e-4ac8-8870-b71d6a91c646",
   "version": "7",
   "dialect": "postgresql",
@@ -203,6 +203,13 @@
           "type": "jsonb",
           "primaryKey": false,
           "notNull": true
+        },
+        "table_seats": {
+          "name": "table_seats",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::jsonb"
         },
         "request_types": {
           "name": "request_types",
